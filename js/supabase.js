@@ -1,10 +1,11 @@
 // ============================================
 // SUPABASE - CLIENTE Y OPERACIONES
+// Red Conecta San Juan
 // Usa la API REST de Supabase (PostgREST) directamente con fetch
 // ============================================
 
-// Token actual: si hay sesión iniciada se usa su JWT para que las políticas
-// RLS con auth.role() = 'authenticated' funcionen; si no, se usa la anon key.
+// Token actual: si hay sesión iniciada se usa su JWT para que las
+// políticas RLS de lectura admin funcionen; si no, se usa la anon key.
 function tokenActual() {
     return sessionStorage.getItem('sb_access_token') || SUPABASE_ANON_KEY;
 }
@@ -38,9 +39,9 @@ async function errorSupabase(response, prefijo, pista) {
 
     let pistaTexto = pista || '';
     if (!pistaTexto && response.status === 401) {
-        pistaTexto = ' Posible causa: políticas RLS que no permiten esta operación (ejecutá sql/comentarios.sql).';
+        pistaTexto = ' Posible causa: políticas RLS que no permiten esta operación (ejecutá sql/setup_conecta.sql).';
     } else if (!pistaTexto && response.status === 404) {
-        pistaTexto = ' Posible causa: la tabla no existe en Supabase (ejecutá sql/comentarios.sql).';
+        pistaTexto = ' Posible causa: la tabla no existe en Supabase (ejecutá sql/setup_conecta.sql).';
     } else if (!pistaTexto && response.status === 400) {
         pistaTexto = ' Posible causa: bucket de Storage inexistente o datos inválidos.';
     }
@@ -48,148 +49,65 @@ async function errorSupabase(response, prefijo, pista) {
     return `${prefijo} (${response.status})${detalle}${pistaTexto}`;
 }
 
-// SELECT: obtener registros de una tabla
-async function supabaseSelect(tabla, opciones = 'select=*') {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/${tabla}?${opciones}`, {
-        headers: headersSupabase()
-    });
+/* ============================================
+   REGISTROS / PERFILES - CRUD
+   ============================================ */
 
-    if (!response.ok) {
-        throw new Error(await errorSupabase(response, `Error al consultar ${tabla}`));
-    }
-
-    return response.json();
-}
-
-// INSERT: crear un registro
-async function supabaseInsert(tabla, datos) {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/${tabla}`, {
+// INSERT: guardar un registro del formulario
+async function insertarRegistro(datos) {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/registros`, {
         method: 'POST',
         headers: headersSupabase({ 'Prefer': 'return=representation' }),
         body: JSON.stringify(datos)
     });
 
     if (!response.ok) {
-        throw new Error(await errorSupabase(response, `Error al crear en ${tabla}`));
+        throw new Error(await errorSupabase(response, 'Error al guardar el registro'));
     }
 
     return response.json();
 }
 
-// UPDATE: actualizar un registro por id
-async function supabaseUpdate(tabla, id, datos) {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/${tabla}?id=eq.${id}`, {
-        method: 'PATCH',
-        headers: headersSupabase({ 'Prefer': 'return=representation' }),
-        body: JSON.stringify(datos)
-    });
+// SELECT: listar todos los registros (panel admin, requiere sesión)
+async function listarRegistros() {
+    const response = await fetch(
+        `${SUPABASE_URL}/rest/v1/registros?select=*&order=fecha_registro.desc`,
+        { headers: headersSupabase() }
+    );
 
     if (!response.ok) {
-        throw new Error(await errorSupabase(response, `Error al actualizar ${tabla}`));
+        throw new Error(await errorSupabase(response, 'Error al consultar los registros'));
     }
 
     return response.json();
 }
 
-// DELETE: eliminar un registro por id
-async function supabaseDelete(tabla, id) {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/${tabla}?id=eq.${id}`, {
+// DELETE: eliminar un registro por id (panel admin)
+async function eliminarRegistro(id) {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/registros?id=eq.${id}`, {
         method: 'DELETE',
         headers: headersSupabase()
     });
 
     if (!response.ok) {
-        throw new Error(await errorSupabase(response, `Error al eliminar de ${tabla}`));
+        throw new Error(await errorSupabase(response, 'Error al eliminar el registro'));
     }
 }
 
 /* ============================================
-   NOTICIAS - CRUD
+   ARCHIVOS - SUPABASE STORAGE
+   Bucket "archivos-perfil" (público)
    ============================================ */
 
-// Obtener todas las noticias: primero las destacadas, luego por fecha descendente
-async function obtenerNoticias() {
-    return supabaseSelect('noticias', 'select=*&order=destacado.desc,fecha_publicacion.desc');
-}
-
-// Crear una noticia nueva
-async function crearNoticia(datos) {
-    const noticia = {
-        titulo: datos.titulo,
-        subtitulo: datos.subtitulo || '',
-        contenido: datos.contenido || '',
-        categoria: datos.categoria,
-        autor: datos.autor,
-        imagen_url: datos.imagen_url || '',
-        destacado: datos.destacado || false,
-        fecha_publicacion: datos.fecha_publicacion || new Date().toISOString()
-    };
-    return supabaseInsert('noticias', noticia);
-}
-
-// Actualizar una noticia existente por id
-async function actualizarNoticia(id, datos) {
-    return supabaseUpdate('noticias', id, datos);
-}
-
-// Eliminar una noticia por id
-async function eliminarNoticia(id) {
-    return supabaseDelete('noticias', id);
-}
-
-// Obtener categorías distintas que existen en la tabla de noticias
-async function obtenerCategorias() {
-    const registros = await supabaseSelect('noticias', 'select=categoria');
-    const categorias = [...new Set(registros.map(r => r.categoria).filter(Boolean))].sort();
-    return categorias;
-}
-
-/* ============================================
-   COMENTARIOS - CRUD
-   ============================================ */
-
-// Obtener los comentarios aprobados de una noticia (portada)
-async function obtenerComentarios(noticiaId) {
-    return supabaseSelect(
-        'comentarios',
-        `select=*&noticia_id=eq.${noticiaId}&aprobado=eq.true&order=fecha_comentario.asc`
-    );
-}
-
-// Crear un comentario (queda pendiente de aprobación)
-async function crearComentario(datos) {
-    return supabaseInsert('comentarios', datos);
-}
-
-// Obtener todos los comentarios para moderar (panel admin)
-async function obtenerComentariosAdmin() {
-    return supabaseSelect('comentarios', 'select=*&order=fecha_comentario.desc');
-}
-
-// Aprobar (o modificar) un comentario
-async function actualizarComentario(id, datos) {
-    return supabaseUpdate('comentarios', id, datos);
-}
-
-// Eliminar un comentario
-async function eliminarComentario(id) {
-    return supabaseDelete('comentarios', id);
-}
-
-/* ============================================
-   IMÁGENES - SUPABASE STORAGE
-   ============================================ */
-
-// Sube una imagen al bucket "noticias-imagenes" y devuelve su URL pública.
-// Requiere que el bucket exista y tenga las políticas de escritura habilitadas
-// (ver archivo sql/comentarios.sql).
-async function subirImagen(file) {
+// Sube un archivo (CV, flyer, presentación) al bucket "archivos-perfil"
+// y devuelve { url, nombre } con la URL pública y el nombre original.
+async function subirArchivoPerfil(file) {
     if (!file) throw new Error('No hay archivo para subir');
 
-    const extension = (file.name.split('.').pop() || 'jpg').toLowerCase();
-    const ruta = `noticias/${Date.now()}_${Math.random().toString(36).slice(2, 10)}.${extension}`;
+    const extension = (file.name.split('.').pop() || 'bin').toLowerCase();
+    const ruta = `${Date.now()}_${Math.random().toString(36).slice(2, 10)}.${extension}`;
 
-    const response = await fetch(`${SUPABASE_URL}/storage/v1/object/noticias-imagenes/${ruta}`, {
+    const response = await fetch(`${SUPABASE_URL}/storage/v1/object/archivos-perfil/${ruta}`, {
         method: 'POST',
         headers: {
             'apikey': SUPABASE_ANON_KEY,
@@ -202,31 +120,18 @@ async function subirImagen(file) {
     if (!response.ok) {
         throw new Error(await errorSupabase(
             response,
-            'Error al subir la imagen',
-            ' Verificá que el bucket "noticias-imagenes" exista (ejecutá sql/comentarios.sql).'
+            'Error al subir el archivo',
+            ' Verificá que el bucket "archivos-perfil" exista (ejecutá sql/setup_conecta.sql).'
         ));
     }
 
-    return getImagenPublicaURL(ruta);
+    return {
+        url: getArchivoPublicoURL(ruta),
+        nombre: file.name
+    };
 }
 
-// URL pública de un archivo dentro del bucket "noticias-imagenes"
-function getImagenPublicaURL(ruta) {
-    return `${SUPABASE_URL}/storage/v1/object/public/noticias-imagenes/${ruta}`;
-}
-
-// (Opcional) Elimina una imagen del bucket. No se llama automáticamente al
-// editar una noticia para no romper URLs ya publicadas.
-async function eliminarImagen(ruta) {
-    const response = await fetch(`${SUPABASE_URL}/storage/v1/object/noticias-imagenes/${ruta}`, {
-        method: 'DELETE',
-        headers: {
-            'apikey': SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${tokenActual()}`
-        }
-    });
-
-    if (!response.ok) {
-        throw new Error(await errorSupabase(response, 'Error al eliminar la imagen'));
-    }
+// URL pública de un archivo dentro del bucket "archivos-perfil"
+function getArchivoPublicoURL(ruta) {
+    return `${SUPABASE_URL}/storage/v1/object/public/archivos-perfil/${ruta}`;
 }

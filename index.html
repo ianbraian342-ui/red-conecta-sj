@@ -3,69 +3,463 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Diario Digital</title>
+    <meta name="description" content="Red Conecta San Juan - Conectamos personas, profesionales, empresas y oportunidades. Formate parte de la red y sumate a nuestra comunidad.">
+    <title>Red Conecta San Juan</title>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="css/estilo.css">
 </head>
 <body>
-    <!-- Encabezado -->
+
+    <!-- ==================== ENCABEZADO ==================== -->
     <header class="header">
-        <h1>📰 Mi Diario Digital</h1>
-        <p>Información veraz y actualizada</p>
+        <div class="header-inner">
+            <a class="header-logo" href="#inicio">
+                <img src="assets/imagenes/logo.svg" alt="Logo Red Conecta San Juan" class="logo-img">
+                <span class="logo-texto">Red Conecta <strong>San Juan</strong></span>
+            </a>
+
+            <nav class="header-nav" aria-label="Navegación principal">
+                <a href="#que-es">¿Qué es?</a>
+                <a href="#perfiles">Perfiles</a>
+                <a href="#oportunidades">Oportunidades</a>
+                <a class="btn btn-primario btn-header" href="#registro">QUIERO REGISTRARME</a>
+            </nav>
+
+            <button class="nav-toggle" id="nav-toggle" aria-label="Abrir menú">☰</button>
+        </div>
     </header>
 
-    <!-- Contenedor principal -->
-    <div class="container">
-        <!-- Menú de categorías (filtros tipo píldora) -->
-        <nav class="categorias-menu" id="categorias-menu" aria-label="Filtrar por categoría">
-            <button class="btn-pill activo" data-categoria="">Todas</button>
-        </nav>
+    <main>
 
-        <!-- Grid de noticias -->
-        <div id="noticias-container">
-            <div class="loading">Cargando noticias</div>
-        </div>
-    </div>
+        <!-- ==================== HERO ==================== -->
+        <section class="hero" id="inicio">
+            <div class="container hero-inner">
+                <div class="hero-contenido">
+                    <span class="hero-badge">Comunidad profesional de San Juan</span>
+                    <h1 class="hero-titulo">RED CONECTA<br>SAN JUAN</h1>
+                    <p class="hero-eslogan">Conectamos personas, profesionales, empresas y oportunidades.</p>
+                    <p class="hero-texto">
+                        Un espacio para que sanjuaninos y sanjuaninas, emprendimientos, empresas e
+                        instituciones se encuentren, colaboren y crezcan juntos. Formá parte de una
+                        red que genera vínculos reales y nuevas oportunidades.
+                    </p>
+                    <div class="hero-acciones">
+                        <button class="btn btn-primario btn-lg btn-registrar" data-scroll="#registro">
+                            QUIERO REGISTRARME
+                        </button>
+                        <a class="btn btn-secundario btn-lg" data-scroll="#que-es" href="#que-es">Conocé más</a>
+                    </div>
+                </div>
 
-    <!-- Modal de detalle de noticia (contenido completo + comentarios) -->
-    <div id="modal-noticia" class="modal-overlay" style="display: none;" aria-hidden="true">
-        <div class="modal-contenido" role="dialog" aria-modal="true" aria-label="Noticia">
-            <button class="modal-cerrar" id="btn-cerrar-modal" aria-label="Cerrar">✕</button>
-            <div id="modal-cuerpo"></div>
+                <div class="hero-grafico" aria-hidden="true">
+                    <!-- SVG decorativo: nodos conectados -->
+                    <svg viewBox="0 0 400 380" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="200" cy="190" r="120" stroke="rgba(255,255,255,.25)" stroke-width="1.5"/>
+                        <circle cx="200" cy="190" r="78" stroke="rgba(255,255,255,.25)" stroke-width="1.5"/>
+                        <g stroke="rgba(255,255,255,.7)" stroke-width="2">
+                            <line x1="200" y1="70" x2="300" y2="150"/>
+                            <line x1="300" y1="150" x2="150" y2="290"/>
+                            <line x1="150" y1="290" x2="100" y2="120"/>
+                            <line x1="100" y1="120" x2="200" y2="70"/>
+                            <line x1="200" y1="70" x2="120" y2="250"/>
+                            <line x1="300" y1="150" x2="280" y2="300"/>
+                        </g>
+                        <g fill="#ffffff">
+                            <circle cx="200" cy="70" r="14"/>
+                            <circle cx="300" cy="150" r="12"/>
+                            <circle cx="150" cy="290" r="13"/>
+                            <circle cx="100" cy="120" r="10"/>
+                            <circle cx="120" cy="250" r="9"/>
+                            <circle cx="280" cy="300" r="9"/>
+                        </g>
+                        <circle cx="200" cy="190" r="46" fill="#0ea5e9"/>
+                        <text x="200" y="199" text-anchor="middle" font-size="28">🤝</text>
+                    </svg>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== ¿QUÉ ES? ==================== -->
+        <section class="seccion" id="que-es">
+            <div class="container">
+                <h2 class="seccion-titulo">¿Qué es la <span class="resaltado">Red Conecta San Juan</span>?</h2>
+                <p class="seccion-intro">
+                    La Red Conecta San Juan es una comunidad abierta que une a personas, profesionales,
+                    empresas e instituciones de nuestra provincia. Creemos que el trabajo en red multiplica
+                    oportunidades: quien forma parte de la red, no está solo.
+                </p>
+
+                <div class="grid-bloques">
+                    <article class="bloque">
+                        <span class="bloque-icono">👤</span>
+                        <h3>Personas</h3>
+                        <p>
+                            Profesionales, técnicos, estudiantes y personas en búsqueda laboral que quieren
+                            crecer, capacitarse y encontrar nuevas oportunidades.
+                        </p>
+                    </article>
+                    <article class="bloque">
+                        <span class="bloque-icono">🏢</span>
+                        <h3>Empresas</h3>
+                        <p>
+                            Empresas y PyMEs sanjuaninas que buscan talento, proveedores, clientes y
+                            alianzas comerciales para potenciar su actividad.
+                        </p>
+                    </article>
+                    <article class="bloque">
+                        <span class="bloque-icono">💼</span>
+                        <h3>Oportunidades</h3>
+                        <p>
+                            Empleos, pasantías, capacitaciones, emprendimientos y proyectos que se
+                            difunden a través de la red para llegar a toda la provincia.
+                        </p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== ¿QUIÉNES PUEDEN REGISTRARSE? ==================== -->
+        <section class="seccion seccion-gris" id="perfiles">
+            <div class="container">
+                <h2 class="seccion-titulo">¿Quiénes pueden <span class="resaltado">registrarse?</span></h2>
+                <p class="seccion-intro">
+                    La red es abierta y diversa. Cualquiera que quiera conectar con la comunidad
+                    profesional y empresarial de San Juan tiene un lugar acá.
+                </p>
+
+                <div class="grid-tarjetas">
+                    <article class="tarjeta-perfil">
+                        <span class="tarjeta-icono">🎓</span>
+                        <h3>Profesionales</h3>
+                        <p>Profesionales de todas las disciplinas que buscan crecer y conectar.</p>
+                    </article>
+                    <article class="tarjeta-perfil">
+                        <span class="tarjeta-icono">🛠️</span>
+                        <h3>Técnicos y oficios</h3>
+                        <p>Oficios y tecnicaturas: la fuerza laboral que mueve la provincia.</p>
+                    </article>
+                    <article class="tarjeta-perfil">
+                        <span class="tarjeta-icono">🔍</span>
+                        <h3>Personas en búsqueda laboral</h3>
+                        <p>Quienes buscan su primer empleo o un nuevo desafío laboral.</p>
+                    </article>
+                    <article class="tarjeta-perfil">
+                        <span class="tarjeta-icono">🚀</span>
+                        <h3>Emprendedores</h3>
+                        <p>Emprendedores que quieren difundir, vender y encontrar alianzas.</p>
+                    </article>
+                    <article class="tarjeta-perfil">
+                        <span class="tarjeta-icono">🏢</span>
+                        <h3>Empresas y PyMEs</h3>
+                        <p>Empresas que buscan personal, proveedores, clientes y socios.</p>
+                    </article>
+                    <article class="tarjeta-perfil">
+                        <span class="tarjeta-icono">📚</span>
+                        <h3>Estudiantes</h3>
+                        <p>Estudiantes en busca de pasantías, prácticas y primera experiencia.</p>
+                    </article>
+                    <article class="tarjeta-perfil">
+                        <span class="tarjeta-icono">🏛️</span>
+                        <h3>Instituciones</h3>
+                        <p>Organizaciones e instituciones que suman a la comunidad.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== ¿QUÉ PODÉS ENCONTRAR? ==================== -->
+        <section class="seccion" id="oportunidades">
+            <div class="container">
+                <h2 class="seccion-titulo">¿Qué podés <span class="resaltado">encontrar?</span></h2>
+                <p class="seccion-intro">
+                    La red es un punto de encuentro con beneficios concretos para cada integrante.
+                </p>
+
+                <div class="lista-oportunidades">
+                    <div class="oportunidad">
+                        <span class="oportunidad-icono">💼</span>
+                        <div>
+                            <h3>Oportunidades laborales</h3>
+                            <p>Empleos, pasantías y prácticas difundidas dentro de la red.</p>
+                        </div>
+                    </div>
+                    <div class="oportunidad">
+                        <span class="oportunidad-icono">🤝</span>
+                        <div>
+                            <h3>Networking</h3>
+                            <p>Contacto directo con personas, empresas e instituciones de toda la provincia.</p>
+                        </div>
+                    </div>
+                    <div class="oportunidad">
+                        <span class="oportunidad-icono">🎓</span>
+                        <div>
+                            <h3>Capacitación y formación</h3>
+                            <p>Cursos, talleres y charlas para seguir creciendo profesionalmente.</p>
+                        </div>
+                    </div>
+                    <div class="oportunidad">
+                        <span class="oportunidad-icono">📈</span>
+                        <div>
+                            <h3>Clientes y proveedores</h3>
+                            <p>Empresas y emprendedores conectan con nuevos clientes y proveedores.</p>
+                        </div>
+                    </div>
+                    <div class="oportunidad">
+                        <span class="oportunidad-icono">🔗</span>
+                        <div>
+                            <h3>Alianzas estratégicas</h3>
+                            <p>Proyectos conjuntos, colaboraciones y acuerdos comerciales.</p>
+                        </div>
+                    </div>
+                    <div class="oportunidad">
+                        <span class="oportunidad-icono">📣</span>
+                        <div>
+                            <h3>Difusión de tu emprendimiento</h3>
+                            <p>Mayor visibilidad para tu emprendimiento, marca o institución.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cta-banner">
+                    <p>No esperes más. Formá parte de una red que te abre puertas.</p>
+                    <button class="btn btn-primario btn-lg btn-registrar" data-scroll="#registro">
+                        QUIERO REGISTRARME
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== FORMULARIO MULTI-PASO ==================== -->
+        <section class="seccion seccion-formulario" id="registro">
+            <div class="container container-estrecho">
+                <h2 class="seccion-titulo">Formá parte de la <span class="resaltado">Red</span></h2>
+                <p class="seccion-intro">
+                    Completá el formulario en unos minutos. Es rápido, simple y gratuito.
+                </p>
+
+                <!-- Indicador de progreso -->
+                <ol class="progreso" id="progreso" aria-label="Progreso del formulario">
+                    <li class="progreso-item activo" data-paso="1"><span class="progreso-numero">1</span><span class="progreso-etiqueta">Perfil</span></li>
+                    <li class="progreso-item" data-paso="2"><span class="progreso-numero">2</span><span class="progreso-etiqueta">Datos</span></li>
+                    <li class="progreso-item" data-paso="3"><span class="progreso-numero">3</span><span class="progreso-etiqueta">Tu perfil</span></li>
+                    <li class="progreso-item" data-paso="4"><span class="progreso-numero">4</span><span class="progreso-etiqueta">Archivo</span></li>
+                    <li class="progreso-item" data-paso="5"><span class="progreso-numero">5</span><span class="progreso-etiqueta">Preferencias</span></li>
+                    <li class="progreso-item" data-paso="6"><span class="progreso-numero">6</span><span class="progreso-etiqueta">Listo</span></li>
+                </ol>
+
+                <form id="formulario-red" class="formulario" novalidate>
+
+                    <!-- ============ PASO 1: PERFIL ============ -->
+                    <div class="paso" data-paso="1">
+                        <h3 class="paso-titulo">Elegí tu perfil</h3>
+                        <p class="paso-subtitulo">Seleccioná la opción que mejor te describa.</p>
+
+                        <div class="grid-perfiles" id="grid-perfiles" role="radiogroup" aria-label="Tipo de perfil">
+                            <button type="button" class="opcion-perfil" data-valor="profesional">
+                                <span class="opcion-icono">🎓</span>
+                                <span class="opcion-nombre">Profesional</span>
+                            </button>
+                            <button type="button" class="opcion-perfil" data-valor="tecnico">
+                                <span class="opcion-icono">🛠️</span>
+                                <span class="opcion-nombre">Técnico / oficio</span>
+                            </button>
+                            <button type="button" class="opcion-perfil" data-valor="busco_trabajo">
+                                <span class="opcion-icono">🔍</span>
+                                <span class="opcion-nombre">Busco trabajo</span>
+                            </button>
+                            <button type="button" class="opcion-perfil" data-valor="emprendedor">
+                                <span class="opcion-icono">🚀</span>
+                                <span class="opcion-nombre">Emprendedor/a</span>
+                            </button>
+                            <button type="button" class="opcion-perfil" data-valor="empresa">
+                                <span class="opcion-icono">🏢</span>
+                                <span class="opcion-nombre">Empresa / PyME</span>
+                            </button>
+                            <button type="button" class="opcion-perfil" data-valor="estudiante">
+                                <span class="opcion-icono">📚</span>
+                                <span class="opcion-nombre">Estudiante</span>
+                            </button>
+                            <button type="button" class="opcion-perfil" data-valor="institucion">
+                                <span class="opcion-icono">🏛️</span>
+                                <span class="opcion-nombre">Institución / organización</span>
+                            </button>
+                        </div>
+                        <p class="campo-error-perfil" id="error-perfil" hidden>Seleccioná un perfil para continuar.</p>
+                    </div>
+
+                    <!-- ============ PASO 2: DATOS ============ -->
+                    <div class="paso" data-paso="2" hidden>
+                        <h3 class="paso-titulo">Tus datos</h3>
+                        <p class="paso-subtitulo">Estos datos son comunes para todos los perfiles.</p>
+
+                        <div class="campo" id="grupo-nombre">
+                            <label for="nombre_apellido">Nombre y apellido *</label>
+                            <input type="text" id="nombre_apellido" name="nombre_apellido" placeholder="Ej: Juan Pérez" autocomplete="name">
+                            <span class="campo-error">Ingresá tu nombre y apellido</span>
+                        </div>
+
+                        <div class="campo" id="grupo-localidad">
+                            <label for="localidad">Localidad *</label>
+                            <select id="localidad" name="localidad">
+                                <option value="">Seleccioná tu localidad</option>
+                                <option value="Albardón">Albardón</option>
+                                <option value="Angaco">Angaco</option>
+                                <option value="Calingasta">Calingasta</option>
+                                <option value="Capital">Capital</option>
+                                <option value="Caucete">Caucete</option>
+                                <option value="Chimbas">Chimbas</option>
+                                <option value="Iglesia">Iglesia</option>
+                                <option value="Jáchal">Jáchal</option>
+                                <option value="Nueve de Julio">Nueve de Julio</option>
+                                <option value="Pocito">Pocito</option>
+                                <option value="Rawson">Rawson</option>
+                                <option value="Rivadavia">Rivadavia</option>
+                                <option value="San Martín">San Martín</option>
+                                <option value="Santa Lucía">Santa Lucía</option>
+                                <option value="Sarmiento">Sarmiento</option>
+                                <option value="Ullum">Ullum</option>
+                                <option value="Valle Fértil">Valle Fértil</option>
+                                <option value="Veinticinco de Mayo">Veinticinco de Mayo</option>
+                                <option value="Zonda">Zonda</option>
+                                <option value="otra">Otra</option>
+                            </select>
+                            <input type="text" id="localidad_otra" name="localidad_otra" placeholder="Escribí tu localidad" hidden>
+                            <span class="campo-error">Seleccioná o indicá tu localidad</span>
+                        </div>
+
+                        <div class="campo" id="grupo-whatsapp">
+                            <label for="whatsapp">WhatsApp *</label>
+                            <input type="tel" id="whatsapp" name="whatsapp" placeholder="Ej: +54 9 264 4567890" autocomplete="tel">
+                            <span class="campo-error">Ingresá un WhatsApp válido (ej: +54 9 264 4567890)</span>
+                        </div>
+
+                        <div class="campo" id="grupo-email">
+                            <label for="email">Correo electrónico *</label>
+                            <input type="email" id="email" name="email" placeholder="ejemplo@correo.com" autocomplete="email">
+                            <span class="campo-error">Ingresá un email válido</span>
+                        </div>
+
+                        <div class="campo">
+                            <label for="red_social">Instagram / LinkedIn <span class="opcional">(opcional)</span></label>
+                            <input type="text" id="red_social" name="red_social" placeholder="Ej: @tuusuario o linkedin.com/in/tuperfil">
+                        </div>
+                    </div>
+
+                    <!-- ============ PASO 3: PERFIL (DINÁMICO) ============ -->
+                    <div class="paso" data-paso="3" hidden>
+                        <h3 class="paso-titulo">Tu perfil</h3>
+                        <p class="paso-subtitulo" id="paso3-subtitulo"></p>
+                        <div id="paso3-campos"></div>
+                    </div>
+
+                    <!-- ============ PASO 4: ARCHIVO ============ -->
+                    <div class="paso" data-paso="4" hidden>
+                        <h3 class="paso-titulo">Adjuntar archivo</h3>
+                        <p class="paso-subtitulo" id="paso4-subtitulo"></p>
+
+                        <div class="campo" id="grupo-archivo">
+                            <label for="archivo" id="zona-archivo" class="zona-archivo">
+                                <span class="zona-icono">📎</span>
+                                <span class="zona-titulo">Elegí un archivo</span>
+                                <span class="zona-hint">PDF, DOC, DOCX, JPG o PNG · Máximo 5 MB</span>
+                                <input type="file" id="archivo" name="archivo" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" hidden>
+                            </label>
+                            <div id="archivo-info" class="archivo-info" hidden>
+                                <span id="archivo-nombre"></span>
+                                <button type="button" class="btn-enlace" id="archivo-quitar">Quitar</button>
+                            </div>
+                            <span class="campo-error">El archivo debe ser PDF, DOC, DOCX, JPG o PNG y pesar menos de 5 MB</span>
+                        </div>
+
+                        <p class="nota">📌 Para profesionales y técnicos, recomendamos adjuntar tu <strong>CV</strong>. Para empresas, emprendedores e instituciones, un <strong>flyer o presentación</strong>.</p>
+                    </div>
+
+                    <!-- ============ PASO 5: PREFERENCIAS Y AUTORIZACIÓN ============ -->
+                    <div class="paso" data-paso="5" hidden>
+                        <h3 class="paso-titulo">Preferencias y autorización</h3>
+
+                        <div class="campo" id="grupo-preferencias">
+                            <label class="campo-etiqueta">¿Qué te gustaría encontrar en Conecta San Juan?</label>
+                            <div class="lista-check">
+                                <label class="check"><input type="checkbox" name="preferencias" value="Oportunidades laborales"> <span>Oportunidades laborales</span></label>
+                                <label class="check"><input type="checkbox" name="preferencias" value="Networking"> <span>Networking</span></label>
+                                <label class="check"><input type="checkbox" name="preferencias" value="Capacitación y formación"> <span>Capacitación y formación</span></label>
+                                <label class="check"><input type="checkbox" name="preferencias" value="Clientes"> <span>Clientes</span></label>
+                                <label class="check"><input type="checkbox" name="preferencias" value="Alianzas estratégicas"> <span>Alianzas estratégicas</span></label>
+                                <label class="check"><input type="checkbox" name="preferencias" value="Difusión de mi emprendimiento"> <span>Difusión de mi emprendimiento</span></label>
+                                <label class="check"><input type="checkbox" name="preferencias" value="Otra"> <span>Otra</span></label>
+                            </div>
+                            <span class="campo-error">Seleccioná al menos una preferencia</span>
+                        </div>
+
+                        <div class="campo" id="grupo-autorizaciones">
+                            <label class="campo-etiqueta">Autorizaciones *</label>
+                            <label class="check check-autorizacion"><input type="checkbox" id="autoriza_datos"> <span>Autorizo el uso de mis datos personales para formar parte de la Red Conecta San Juan.</span></label>
+                            <label class="check check-autorizacion"><input type="checkbox" id="autoriza_contacto"> <span>Autorizo que me contacten por los canales indicados (WhatsApp / email / redes) con información de la red.</span></label>
+                            <span class="campo-error">Debés aceptar ambas autorizaciones para continuar</span>
+                        </div>
+                    </div>
+
+                    <!-- ============ PASO 6: ÉXITO ============ -->
+                    <div class="paso" data-paso="6" hidden>
+                        <div class="exito">
+                            <span class="exito-icono">🎉</span>
+                            <h3 class="exito-titulo">¡YA SOS PARTE DE LA RED! 🥰</h3>
+                            <p class="exito-texto">
+                                ¡Gracias por sumarte! Tu registro fue enviado correctamente. Te estaremos
+                                contactando a la brevedad con más información sobre la Red Conecta San Juan.
+                            </p>
+                            <p class="exito-texto">
+                                Mientras tanto, seguinos en nuestras redes para no perderte nada.
+                            </p>
+                            <div class="exito-redes">
+                                <a class="btn btn-secundario" href="#" target="_blank" rel="noopener">Instagram</a>
+                                <a class="btn btn-secundario" href="#" target="_blank" rel="noopener">LinkedIn</a>
+                                <a class="btn btn-secundario" href="#" target="_blank" rel="noopener">Facebook</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ============ NAVEGACIÓN DEL FORMULARIO ============ -->
+                    <div class="formulario-nav" id="formulario-nav">
+                        <button type="button" class="btn btn-secundario" id="btn-anterior" hidden>← Atrás</button>
+                        <button type="button" class="btn btn-primario" id="btn-siguiente">Siguiente →</button>
+                        <button type="submit" class="btn btn-primario" id="btn-enviar" hidden>Enviar registro</button>
+                    </div>
+
+                    <!-- Mensaje de error general (fallo de red / Supabase) -->
+                    <div class="formulario-mensaje" id="formulario-mensaje" hidden></div>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <!-- ==================== PIE DE PÁGINA ==================== -->
+    <footer class="footer">
+        <div class="container footer-inner">
+            <div class="footer-logo">
+                <img src="assets/imagenes/logo.svg" alt="Logo Red Conecta San Juan" class="logo-img">
+                <span>Red Conecta <strong>San Juan</strong></span>
+            </div>
+            <p class="footer-eslogan">Conectamos personas, profesionales, empresas y oportunidades.</p>
+            <div class="footer-redes">
+                <a class="footer-red" href="#" target="_blank" rel="noopener" aria-label="Instagram">📸</a>
+                <a class="footer-red" href="#" target="_blank" rel="noopener" aria-label="LinkedIn">💼</a>
+                <a class="footer-red" href="#" target="_blank" rel="noopener" aria-label="Facebook">👍</a>
+            </div>
+            <p class="footer-credito">© <span id="anio"></span> Red Conecta San Juan · <a href="admin.html">Acceso administración</a></p>
         </div>
-    </div>
+    </footer>
 
     <!-- Scripts -->
     <script src="js/config.js"></script>
     <script src="js/supabase.js"></script>
-    <script src="js/noticias.js"></script>
-    <script src="js/comentarios.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Cargar noticias y categorías automáticamente al abrir la página
-            cargarNoticiasPortada();
-            cargarCategorias();
-
-            // Filtro por categoría (delegación de eventos sobre el menú)
-            document.getElementById('categorias-menu').addEventListener('click', function(e) {
-                const btn = e.target.closest('.btn-pill');
-                if (!btn) return;
-
-                this.querySelectorAll('.btn-pill').forEach(b => b.classList.remove('activo'));
-                btn.classList.add('activo');
-
-                filtrarPorCategoria(btn.dataset.categoria);
-            });
-
-            // Cerrar modal: botón, clic fuera o tecla Escape
-            document.getElementById('btn-cerrar-modal').addEventListener('click', cerrarDetalleNoticia);
-            document.getElementById('modal-noticia').addEventListener('click', function(e) {
-                if (e.target === this) cerrarDetalleNoticia();
-            });
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') cerrarDetalleNoticia();
-            });
-        });
-    </script>
+    <script src="js/ui-controller.js"></script>
+    <script src="js/form-handler.js"></script>
 </body>
 </html>

@@ -3,229 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Administración - Mi Diario Digital</title>
+    <meta name="robots" content="noindex">
+    <title>Panel de Administración - Red Conecta San Juan</title>
 
-    <!-- Quill.js editor de texto enriquecido -->
-    <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="css/estilo.css">
 </head>
 <body>
-    <!-- Encabezado -->
+
+    <!-- ==================== ENCABEZADO ==================== -->
     <header class="header">
-        <h1>📰 Panel de Administración</h1>
-        <p>Gestión de noticias y comentarios</p>
+        <div class="header-inner">
+            <a class="header-logo" href="index.html">
+                <img src="assets/imagenes/logo.svg" alt="Logo Red Conecta San Juan" class="logo-img">
+                <span class="logo-texto">Red Conecta <strong>San Juan</strong> · Admin</span>
+            </a>
+            <a class="btn btn-secundario btn-header" href="index.html">← Volver al inicio</a>
+        </div>
     </header>
 
-    <div class="container">
+    <main class="container">
+
         <!-- ===================== LOGIN ===================== -->
         <div id="login-panel" class="auth-panel">
             <h2>Iniciar sesión</h2>
-            <p class="auth-subtitulo">Accedé con tu cuenta de administrador</p>
+            <p class="auth-subtitulo">Accedé con tu cuenta de administración</p>
 
             <div id="login-mensaje" class="mensaje"></div>
 
             <form id="login-form" novalidate>
-                <div class="form-group" id="login-email-grupo">
+                <div class="campo" id="login-email-grupo">
                     <label for="login-email">Email</label>
-                    <input type="email" id="login-email" placeholder="admin@midiario.com">
+                    <input type="email" id="login-email" placeholder="admin@conecta.com" autocomplete="email">
                     <span class="campo-error">Ingresá un email válido</span>
                 </div>
-                <div class="form-group" id="login-password-grupo">
+                <div class="campo" id="login-password-grupo">
                     <label for="login-password">Contraseña</label>
-                    <input type="password" id="login-password" placeholder="••••••••">
+                    <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
                     <span class="campo-error">Ingresá tu contraseña</span>
                 </div>
-                <button type="submit" class="btn btn-primario btn-block">Entrar</button>
+                <button type="submit" class="btn btn-primario btn-block" id="btn-login">
+                    <span class="spinner spinner-oscuro"></span>
+                    Entrar
+                </button>
             </form>
-
-            <p class="auth-switch">
-                ¿No tenés cuenta? <a id="link-registro">Registrate</a>
-            </p>
         </div>
 
-        <!-- ===================== REGISTRO ===================== -->
-        <div id="registro-panel" class="auth-panel" style="display: none;">
-            <h2>Crear cuenta</h2>
-            <p class="auth-subtitulo">Registrate como administrador del diario</p>
-
-            <div id="registro-mensaje" class="mensaje"></div>
-
-            <form id="registro-form" novalidate>
-                <div class="form-group" id="registro-nombre-grupo">
-                    <label for="registro-nombre">Nombre</label>
-                    <input type="text" id="registro-nombre" placeholder="Tu nombre completo">
-                    <span class="campo-error">Ingresá tu nombre</span>
-                </div>
-                <div class="form-group" id="registro-email-grupo">
-                    <label for="registro-email">Email</label>
-                    <input type="email" id="registro-email" placeholder="admin@midiario.com">
-                    <span class="campo-error">Ingresá un email válido</span>
-                </div>
-                <div class="form-group" id="registro-password-grupo">
-                    <label for="registro-password">Contraseña</label>
-                    <input type="password" id="registro-password" placeholder="Mínimo 6 caracteres">
-                    <span class="campo-error">La contraseña debe tener al menos 6 caracteres</span>
-                </div>
-                <button type="submit" class="btn btn-primario btn-block">Registrarme</button>
-            </form>
-
-            <p class="auth-switch">
-                ¿Ya tenés cuenta? <a id="link-login">Iniciar sesión</a>
-            </p>
-        </div>
-
-        <!-- ===================== PANEL ADMIN ===================== -->
-        <div id="admin-panel" style="display: none;">
-            <!-- Barra superior: usuario y acciones -->
-            <div class="admin-toolbar">
+        <!-- ===================== PANEL DE REGISTROS ===================== -->
+        <section id="admin-panel" hidden>
+            <div class="admin-header">
+                <h2 class="admin-titulo">Registros de la Red</h2>
                 <div>
-                    <h2>Noticias</h2>
-                    <p class="admin-usuario">👤 Conectado como: <strong id="nombre-usuario">Administrador</strong></p>
-                </div>
-                <div class="acciones">
-                    <button id="btn-nueva" class="btn btn-primario">➕ Nueva noticia</button>
-                    <button id="btn-cerrar-sesion" class="btn btn-secundario">🚪 Cerrar sesión</button>
+                    <span class="header-usuario-nombre">👤 <span id="usuario-nombre"></span></span>
+                    <button class="btn btn-secundario btn-sm" id="btn-cerrar-sesion">Cerrar sesión</button>
                 </div>
             </div>
 
             <div id="admin-mensaje" class="mensaje"></div>
 
-            <!-- Formulario para crear/editar noticias -->
-            <div id="form-noticia-wrap" style="display: none;">
-                <form id="form-noticia" class="form-noticia" novalidate>
-                    <h3 id="form-titulo">Nueva noticia</h3>
-                    <input type="hidden" id="noticia-id">
-
-                    <div class="form-group" id="noticia-titulo-grupo">
-                        <label for="noticia-titulo">Título *</label>
-                        <input type="text" id="noticia-titulo" placeholder="Título de la noticia">
-                        <span class="campo-error">El título es obligatorio</span>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="noticia-subtitulo">Subtítulo</label>
-                        <input type="text" id="noticia-subtitulo" placeholder="Breve descripción">
-                    </div>
-
-                    <!-- Editor de texto enriquecido (Quill.js) -->
-                    <div class="form-group" id="noticia-contenido-grupo">
-                        <label for="editor-quill">Contenido</label>
-                        <div id="editor-quill"></div>
-                    </div>
-
-                    <div class="form-group" id="noticia-categoria-grupo">
-                        <label for="noticia-categoria">Categoría *</label>
-                        <select id="noticia-categoria">
-                            <option value="">Seleccionar...</option>
-                            <option value="Local">Local</option>
-                            <option value="Nacional">Nacional</option>
-                            <option value="Deportes">Deportes</option>
-                            <option value="Cultura">Cultura</option>
-                            <option value="Economía">Economía</option>
-                            <option value="Tecnología">Tecnología</option>
-                        </select>
-                        <span class="campo-error">Seleccioná una categoría</span>
-                    </div>
-
-                    <div class="form-group" id="noticia-autor-grupo">
-                        <label for="noticia-autor">Autor *</label>
-                        <input type="text" id="noticia-autor" placeholder="Nombre del autor">
-                        <span class="campo-error">El autor es obligatorio</span>
-                    </div>
-
-                    <!-- Subida de imagen a Supabase Storage -->
-                    <div class="form-group">
-                        <label for="noticia-imagen">Imagen (subir archivo)</label>
-                        <input type="file" id="noticia-imagen" accept="image/*">
-                        <p class="hint">Si no elegís una imagen nueva, se mantiene la actual.</p>
-                        <div class="imagen-preview-wrap" id="imagen-preview-wrap">
-                            <img id="imagen-preview" alt="Vista previa de la imagen">
-                        </div>
-                    </div>
-
-                    <div class="form-group checkbox">
-                        <input type="checkbox" id="noticia-destacado">
-                        <label for="noticia-destacado">⭐ Destacada (aparece primero en portada)</label>
-                    </div>
-
-                    <div class="form-acciones">
-                        <button type="submit" class="btn btn-primario">💾 Guardar</button>
-                        <button type="button" id="btn-cancelar" class="btn btn-secundario">Cancelar</button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Tabla de noticias -->
-            <div class="tabla-wrap">
-                <table class="tabla-noticias">
+            <div class="table-wrap">
+                <table class="tabla-admin">
                     <thead>
                         <tr>
-                            <th>Título</th>
-                            <th>Categoría</th>
-                            <th>Autor</th>
                             <th>Fecha</th>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th>Tipo de perfil</th>
+                            <th>Localidad</th>
+                            <th>WhatsApp</th>
+                            <th>Red</th>
+                            <th>Archivo</th>
+                            <th>Detalles</th>
+                            <th>Autoriza</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
-                    <tbody id="tabla-body"></tbody>
+                    <tbody id="tabla-registros">
+                        <tr>
+                            <td colspan="11">
+                                <div class="empty-state">
+                                    <span class="empty-icono">⏳</span>
+                                    Cargando registros…
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
+        </section>
+    </main>
 
-            <!-- Moderación de comentarios -->
-            <div class="admin-seccion">
-                <h3>💬 Moderación de comentarios</h3>
-                <p class="admin-usuario">Los comentarios nuevos quedan pendientes hasta que los apruebes.</p>
-                <div class="tabla-wrap">
-                    <table class="tabla-noticias tabla-comentarios">
-                        <thead>
-                            <tr>
-                                <th>Noticia</th>
-                                <th>Nombre</th>
-                                <th>Comentario</th>
-                                <th>Fecha</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabla-comentarios"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Scripts -->
-    <script src="https://cdn.quilljs.com/1.3.7/quill.js"></script>
+    <!-- ==================== SCRIPTS ==================== -->
     <script src="js/config.js"></script>
     <script src="js/supabase.js"></script>
     <script src="js/auth.js"></script>
-    <script src="js/noticias.js"></script>
-    <script src="js/comentarios.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const loginPanel = document.getElementById('login-panel');
-            const registroPanel = document.getElementById('registro-panel');
             const adminPanel = document.getElementById('admin-panel');
+            const mensajeLogin = document.getElementById('login-mensaje');
+            const mensajeAdmin = document.getElementById('admin-mensaje');
 
             /* ==================== UTILIDADES ==================== */
 
-            // Mostrar mensajes en el panel admin
-            window.mostrarMensajeAdmin = function(texto, tipo) {
-                const mensaje = document.getElementById('admin-mensaje');
-                mensaje.textContent = texto;
-                mensaje.className = `mensaje mensaje-${tipo} visible`;
-                setTimeout(() => mensaje.classList.remove('visible'), 4000);
-            };
-
-            // Mostrar mensaje en los paneles de auth
-            function mostrarMensajeAuth(idMensaje, texto, tipo) {
-                const mensaje = document.getElementById(idMensaje);
-                mensaje.textContent = texto;
-                mensaje.className = `mensaje mensaje-${tipo} visible`;
+            function mostrarMensaje(contenedor, texto, tipo) {
+                contenedor.textContent = texto;
+                contenedor.className = 'mensaje mensaje-' + tipo + ' visible';
             }
 
-            // Validación básica de un grupo de formulario
             function validarCampo(grupoId, condicionValida) {
                 const grupo = document.getElementById(grupoId);
                 if (condicionValida()) {
@@ -240,38 +128,6 @@
                 return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
             }
 
-            /* ==================== SWITCH LOGIN / REGISTRO ==================== */
-
-            function mostrarLogin() {
-                loginPanel.style.display = 'block';
-                registroPanel.style.display = 'none';
-            }
-
-            function mostrarRegistro() {
-                loginPanel.style.display = 'none';
-                registroPanel.style.display = 'block';
-            }
-
-            document.getElementById('link-registro').addEventListener('click', mostrarRegistro);
-            document.getElementById('link-login').addEventListener('click', mostrarLogin);
-
-            /* ==================== MOSTRAR PANEL SEGÚN SESIÓN ==================== */
-
-            function mostrarPanelCorrecto() {
-                if (verificarSesion()) {
-                    loginPanel.style.display = 'none';
-                    registroPanel.style.display = 'none';
-                    adminPanel.style.display = 'block';
-                    document.getElementById('nombre-usuario').textContent = nombreUsuario();
-                    cargarNoticiasAdmin();
-                    cargarComentariosAdmin();
-                } else {
-                    loginPanel.style.display = 'block';
-                    registroPanel.style.display = 'none';
-                    adminPanel.style.display = 'none';
-                }
-            }
-
             /* ==================== LOGIN ==================== */
 
             document.getElementById('login-form').addEventListener('submit', async function(e) {
@@ -282,148 +138,187 @@
 
                 const emailOk = validarCampo('login-email-grupo', () => esEmailValido(email));
                 const passOk = validarCampo('login-password-grupo', () => password.length > 0);
-
                 if (!emailOk || !passOk) return;
+
+                const btn = document.getElementById('btn-login');
+                btn.disabled = true;
+                btn.classList.add('btn-loading');
 
                 try {
                     await iniciarSesion(email, password);
-                    mostrarPanelCorrecto();
+                    mostrarPanelAdmin();
                 } catch (error) {
-                    mostrarMensajeAuth('login-mensaje', '❌ ' + error.message, 'error');
+                    mostrarMensaje(mensajeLogin, '❌ ' + error.message, 'error');
+                } finally {
+                    btn.disabled = false;
+                    btn.classList.remove('btn-loading');
                 }
             });
 
-            /* ==================== REGISTRO ==================== */
+            /* ==================== PANEL ADMIN ==================== */
 
-            document.getElementById('registro-form').addEventListener('submit', async function(e) {
-                e.preventDefault();
-
-                const nombre = document.getElementById('registro-nombre').value.trim();
-                const email = document.getElementById('registro-email').value.trim();
-                const password = document.getElementById('registro-password').value;
-
-                const nombreOk = validarCampo('registro-nombre-grupo', () => nombre.length >= 3);
-                const emailOk = validarCampo('registro-email-grupo', () => esEmailValido(email));
-                const passOk = validarCampo('registro-password-grupo', () => password.length >= 6);
-
-                if (!nombreOk || !emailOk || !passOk) return;
-
-                try {
-                    await registrarUsuario(email, password, nombre);
-                    mostrarMensajeAuth(
-                        'registro-mensaje',
-                        '✅ Cuenta creada. Revisá tu email para confirmar el registro y luego iniciá sesión.',
-                        'exito'
-                    );
-                    document.getElementById('registro-form').reset();
-                } catch (error) {
-                    mostrarMensajeAuth('registro-mensaje', '❌ ' + error.message, 'error');
-                }
-            });
-
-            /* ==================== CERRAR SESIÓN ==================== */
+            function mostrarPanelAdmin() {
+                loginPanel.hidden = true;
+                adminPanel.hidden = false;
+                document.getElementById('usuario-nombre').textContent = nombreUsuario();
+                cargarRegistros();
+            }
 
             document.getElementById('btn-cerrar-sesion').addEventListener('click', function() {
-                cerrarSesion();
+                cerrarSesion(true);
             });
 
-            /* ==================== FORMULARIO DE NOTICIA ==================== */
+            // Nombres legibles de los tipos de perfil
+            const etiquetasPerfil = {
+                profesional: 'Profesional',
+                tecnico: 'Técnico / oficio',
+                busco_trabajo: 'Busco trabajo',
+                emprendedor: 'Emprendedor/a',
+                empresa: 'Empresa / PyME',
+                estudiante: 'Estudiante',
+                institucion: 'Institución'
+            };
 
-            // Inicializar el editor de texto enriquecido (Quill)
-            window.quillEditor = new Quill('#editor-quill', {
-                theme: 'snow',
-                placeholder: 'Escribí el cuerpo de la noticia...',
-                modules: {
-                    toolbar: [
-                        [{ 'header': [1, 2, 3, false] }],
-                        ['bold', 'italic', 'underline', 'strike'],
-                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                        [{ 'align': [] }],
-                        ['link', 'blockquote'],
-                        ['clean']
-                    ]
-                }
-            });
+            function escapar(texto) {
+                const div = document.createElement('div');
+                div.textContent = texto;
+                return div.innerHTML;
+            }
 
-            // Abrir formulario para nueva noticia (vacío)
-            document.getElementById('btn-nueva').addEventListener('click', function() {
-                limpiarFormularioNoticia();
-                document.getElementById('form-noticia-wrap').style.display = 'block';
-                document.getElementById('noticia-titulo').focus();
-            });
+            function formatearFecha(iso) {
+                if (!iso) return '—';
+                const fecha = new Date(iso);
+                if (isNaN(fecha)) return '—';
+                return fecha.toLocaleDateString('es-AR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
 
-            // Cancelar edición
-            document.getElementById('btn-cancelar').addEventListener('click', function() {
-                document.getElementById('form-noticia-wrap').style.display = 'none';
-            });
+            // Resumen legible de preferencias + datos del perfil
+            function resumenDetalles(registro) {
+                const partes = [];
 
-            // Vista previa al seleccionar un archivo de imagen
-            document.getElementById('noticia-imagen').addEventListener('change', function() {
-                const archivo = this.files && this.files[0] ? this.files[0] : null;
-                window.imagenArchivo = archivo;
-
-                if (archivo) {
-                    setVistaPrevia(URL.createObjectURL(archivo));
-                } else {
-                    setVistaPrevia(window.imagenUrlActual || '');
-                }
-            });
-
-            // Guardar (crear o actualizar) con validación y subida de imagen
-            document.getElementById('form-noticia').addEventListener('submit', async function(e) {
-                e.preventDefault();
-
-                const titulo = document.getElementById('noticia-titulo').value.trim();
-                const categoria = document.getElementById('noticia-categoria').value;
-                const autor = document.getElementById('noticia-autor').value.trim();
-
-                const tituloOk = validarCampo('noticia-titulo-grupo', () => titulo.length > 0);
-                const categoriaOk = validarCampo('noticia-categoria-grupo', () => categoria !== '');
-                const autorOk = validarCampo('noticia-autor-grupo', () => autor.length > 0);
-
-                if (!tituloOk || !categoriaOk || !autorOk) return;
-
-                // Subir la imagen nueva a Supabase Storage antes de guardar
-                let imagenUrl = window.imagenUrlActual || '';
-                if (window.imagenArchivo) {
-                    try {
-                        mostrarMensajeAdmin('⏳ Subiendo imagen...', 'exito');
-                        imagenUrl = await subirImagen(window.imagenArchivo);
-                    } catch (error) {
-                        mostrarMensajeAdmin('❌ ' + error.message, 'error');
-                        return;
-                    }
-                }
-
-                const id = document.getElementById('noticia-id').value;
-                const datos = {
-                    titulo,
-                    subtitulo: document.getElementById('noticia-subtitulo').value.trim(),
-                    contenido: getContenidoEditor().trim(),
-                    categoria,
-                    autor,
-                    imagen_url: imagenUrl,
-                    destacado: document.getElementById('noticia-destacado').checked
+                const detalles = registro.perfil_detalles || {};
+                const camposLegibles = {
+                    profesion: 'Profesión',
+                    especialidad: 'Especialidad',
+                    experiencia: 'Experiencia',
+                    interes: 'Interés',
+                    nombre_emprendimiento: 'Emprendimiento',
+                    rubro: 'Rubro',
+                    localidad_emprendimiento: 'Localidad',
+                    ofreces: 'Ofrece',
+                    nombre_empresa: 'Empresa',
+                    carrera: 'Carrera',
+                    institucion: 'Institución',
+                    anio_cursado: 'Año',
+                    nombre_institucion: 'Institución'
                 };
 
-                try {
-                    if (id) {
-                        await actualizarNoticia(id, datos);
-                        mostrarMensajeAdmin('Noticia actualizada correctamente ✅', 'exito');
-                    } else {
-                        await crearNoticia(datos);
-                        mostrarMensajeAdmin('Noticia creada correctamente ✅', 'exito');
+                Object.keys(camposLegibles).forEach((clave) => {
+                    if (detalles[clave]) {
+                        const valor = Array.isArray(detalles[clave])
+                            ? detalles[clave].join(', ')
+                            : String(detalles[clave]);
+                        if (valor) partes.push(`<strong>${camposLegibles[clave]}:</strong> ${escapar(valor)}`);
                     }
-                    document.getElementById('form-noticia-wrap').style.display = 'none';
-                    cargarNoticiasAdmin();
-                } catch (error) {
-                    mostrarMensajeAdmin('❌ ' + error.message, 'error');
+                });
+
+                if (Array.isArray(registro.preferencias) && registro.preferencias.length) {
+                    partes.push(`<strong>Quiere encontrar:</strong> ${escapar(registro.preferencias.join(', '))}`);
                 }
-            });
+
+                return partes.join('<br>') || '—';
+            }
+
+            async function cargarRegistros() {
+                const tbody = document.getElementById('tabla-registros');
+
+                try {
+                    const registros = await listarRegistros();
+
+                    if (!registros.length) {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="11">
+                                    <div class="empty-state">
+                                        <span class="empty-icono">🌱</span>
+                                        Todavía no hay registros en la red.
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                        return;
+                    }
+
+                    tbody.innerHTML = registros.map((registro) => `
+                        <tr>
+                            <td>${escapar(formatearFecha(registro.fecha_registro))}</td>
+                            <td><strong>${escapar(registro.nombre_apellido)}</strong></td>
+                            <td>${escapar(registro.email || '')}</td>
+                            <td><span class="badge badge-perfil">${escapar(etiquetasPerfil[registro.tipo_perfil] || registro.tipo_perfil || '')}</span></td>
+                            <td>${escapar(registro.localidad || '')}</td>
+                            <td>${escapar(registro.whatsapp || '')}</td>
+                            <td>${escapar(registro.red_social || '')}</td>
+                            <td>${registro.archivo_url
+                                ? `<a href="${escapar(registro.archivo_url)}" target="_blank" rel="noopener">${escapar(registro.archivo_nombre || 'Ver archivo')}</a>`
+                                : '—'}</td>
+                            <td class="celda-descripcion">${resumenDetalles(registro)}</td>
+                            <td>
+                                ${registro.autoriza_datos ? '✅ Datos' : '❌ Datos'}
+                                ${registro.autoriza_contacto ? '· ✅ Contacto' : '· ❌ Contacto'}
+                            </td>
+                            <td class="acciones-cell">
+                                <button type="button" class="btn btn-danger btn-sm" data-eliminar="${registro.id}" data-nombre="${escapar(registro.nombre_apellido)}">Eliminar</button>
+                            </td>
+                        </tr>
+                    `).join('');
+
+                    // Delegación: eliminar registros
+                    tbody.querySelectorAll('[data-eliminar]').forEach((btn) => {
+                        btn.addEventListener('click', async () => {
+                            const nombre = btn.dataset.nombre;
+                            if (!confirm(`¿Eliminar el registro de "${nombre}"? Esta acción no se puede deshacer.`)) return;
+
+                            btn.disabled = true;
+                            try {
+                                await eliminarRegistro(btn.dataset.eliminar);
+                                mostrarMensaje(mensajeAdmin, '✅ Registro eliminado.', 'exito');
+                                cargarRegistros();
+                            } catch (error) {
+                                btn.disabled = false;
+                                mostrarMensaje(mensajeAdmin, '❌ ' + error.message, 'error');
+                            }
+                        });
+                    });
+
+                } catch (error) {
+                    const esPGRST205 = error.message.includes('PGRST205') || error.message.includes('Could not find the table');
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="11">
+                                <div class="empty-state">
+                                    <span class="empty-icono">${esPGRST205 ? '🛠️' : '⚠️'}</span>
+                                    ${esPGRST205
+                                        ? 'La tabla <strong>registros</strong> no existe en Supabase. Ejecutá <strong>sql/setup_conecta.sql</strong> en el SQL Editor: copialo desde el archivo con el Bloc de notas (no desde un visor con formato), pegá el contenido, hacé <strong>Run</strong> y luego recargá esta página.'
+                                        : 'No se pudieron cargar los registros. Revisá que las políticas RLS estén configuradas (ejecutá sql/setup_conecta.sql) y que la sesión sea válida.'}
+                                    <br><small>${escapar(error.message)}</small>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }
+            }
 
             /* ==================== INICIO ==================== */
 
-            mostrarPanelCorrecto();
+            if (verificarSesion()) {
+                mostrarPanelAdmin();
+            }
         });
     </script>
 </body>
