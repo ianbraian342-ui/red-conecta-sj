@@ -47,22 +47,47 @@ CREATE INDEX idx_registros_tipo ON registros(tipo_perfil);
 --    - Cualquiera puede INSERTAR (formulario público).
 --    - Solo usuarios autenticados (admin) pueden LEER,
 --      MODIFICAR y ELIMINAR registros.
+--
+--    IMPORTANTE: primero se eliminan TODAS las políticas existentes
+--    de la tabla (incluidas las creadas desde el dashboard de
+--    Supabase, p. ej. "Enable insert for authenticated users only").
+--    Si queda una política de INSERT restrictiva, PostgreSQL combina
+--    los WITH CHECK con AND y el registro anónimo se rechaza con el
+--    error 42501 "new row violates row-level security policy".
 -- ============================================================
 
 ALTER TABLE registros ENABLE ROW LEVEL SECURITY;
 
+-- Eliminar cualquier política existente sobre "registros"
+DO $$
+DECLARE
+    pol RECORD;
+BEGIN
+    FOR pol IN
+        SELECT policyname
+        FROM pg_policies
+        WHERE schemaname = 'public' AND tablename = 'registros'
+    LOOP
+        EXECUTE format('DROP POLICY IF EXISTS %I ON public.registros', pol.policyname);
+    END LOOP;
+END
+$$;
+
+-- INSERT público: cualquiera puede registrar su perfil
 DROP POLICY IF EXISTS registros_insertar ON registros;
 CREATE POLICY registros_insertar ON registros
   FOR INSERT
   TO anon, authenticated
   WITH CHECK (true);
 
+-- Lectura: solo usuarios autenticados (admin)
 DROP POLICY IF EXISTS registros_leer_admin ON registros;
 CREATE POLICY registros_leer_admin ON registros
   FOR SELECT
   TO authenticated
   USING (true);
 
+-- Actualización: solo usuarios autenticados (admin)
 DROP POLICY IF EXISTS registros_actualizar_admin ON registros;
 CREATE POLICY registros_actualizar_admin ON registros
   FOR UPDATE
@@ -70,6 +95,7 @@ CREATE POLICY registros_actualizar_admin ON registros
   USING (true)
   WITH CHECK (true);
 
+-- Eliminación: solo usuarios autenticados (admin)
 DROP POLICY IF EXISTS registros_eliminar_admin ON registros;
 CREATE POLICY registros_eliminar_admin ON registros
   FOR DELETE
@@ -113,6 +139,7 @@ USING (bucket_id = 'archivos-perfil');
 -- 4) PERMISOS DE TABLA PARA PostgREST
 -- ============================================================
 
+REVOKE ALL ON registros FROM anon, authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON registros TO authenticated;
 GRANT INSERT ON registros TO anon;
 GRANT USAGE ON SEQUENCE registros_id_seq TO anon, authenticated;

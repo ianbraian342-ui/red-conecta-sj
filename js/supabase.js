@@ -57,15 +57,13 @@ async function errorSupabase(response, prefijo, pista) {
 async function insertarRegistro(datos) {
     const response = await fetch(`${SUPABASE_URL}/rest/v1/registros`, {
         method: 'POST',
-        headers: headersSupabase({ 'Prefer': 'return=representation' }),
+        headers: headersSupabase(),
         body: JSON.stringify(datos)
     });
 
     if (!response.ok) {
         throw new Error(await errorSupabase(response, 'Error al guardar el registro'));
     }
-
-    return response.json();
 }
 
 // SELECT: listar todos los registros (panel admin, requiere sesión)
