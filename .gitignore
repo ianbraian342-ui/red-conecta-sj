@@ -5,3 +5,6 @@ Thumbs.db
 # Ignorar archivos de configuración local (si los hubiera)
 *.local
 *.env
+
+# Ignorar carpeta de copias de seguridad
+backup/
