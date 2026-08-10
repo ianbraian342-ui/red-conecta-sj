@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex">
     <title>Panel de Administración - Red Conecta San Juan</title>
+    <link rel="icon" type="image/svg+xml" href="assets/imagenes/logo.svg">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,7 +13,7 @@
 
     <link rel="stylesheet" href="css/estilo.css">
 </head>
-<body>
+<body class="admin-body">
 
     <!-- ==================== ENCABEZADO ==================== -->
     <header class="header">
@@ -64,6 +65,16 @@
 
             <div id="admin-mensaje" class="mensaje"></div>
 
+            <div class="admin-filtros">
+                <div class="filtro-busqueda">
+                    <input type="search" id="busqueda" placeholder="Buscar por nombre, email, localidad o WhatsApp…">
+                </div>
+                <select id="filtro-perfil" aria-label="Filtrar por tipo de perfil">
+                    <option value="">Todos los perfiles</option>
+                </select>
+                <span class="contador-resultados" id="contador-resultados"></span>
+            </div>
+
             <div class="table-wrap">
                 <table class="tabla-admin">
                     <thead>
@@ -76,14 +87,13 @@
                             <th>WhatsApp</th>
                             <th>Red</th>
                             <th>Archivo</th>
-                            <th>Detalles</th>
                             <th>Autoriza</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="tabla-registros">
                         <tr>
-                            <td colspan="11">
+                            <td colspan="10">
                                 <div class="empty-state">
                                     <span class="empty-icono">⏳</span>
                                     Cargando registros…
@@ -94,6 +104,17 @@
                 </table>
             </div>
         </section>
+
+        <!-- ===================== MODAL DETALLE ===================== -->
+        <div class="modal-overlay" id="modal-detalle" hidden>
+            <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
+                <div class="modal-header">
+                    <h3 id="modal-titulo">Detalle del registro</h3>
+                    <button type="button" class="modal-cerrar" id="modal-cerrar" aria-label="Cerrar">×</button>
+                </div>
+                <div class="modal-cuerpo" id="modal-contenido"></div>
+            </div>
+        </div>
     </main>
 
     <!-- ==================== SCRIPTS ==================== -->
@@ -198,109 +219,333 @@
                 });
             }
 
-            // Resumen legible de preferencias + datos del perfil
-            function resumenDetalles(registro) {
-                const partes = [];
+            // Fecha en dos líneas (día + hora) para la tabla
+            function fechaPartes(iso) {
+                if (!iso) return ['—', ''];
+                const fecha = new Date(iso);
+                if (isNaN(fecha)) return ['—', ''];
+                return [
+                    fecha.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+                    fecha.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
+                ];
+            }
+
+            // Normalizar texto para búsqueda (minúsculas y sin acentos)
+            function normalizar(texto) {
+                return String(texto || '')
+                    .toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '');
+            }
+
+            // Iniciales para el avatar (ej: "María López" → "ML")
+            function iniciales(nombre) {
+                const partes = String(nombre || '').trim().split(/\s+/).filter(Boolean);
+                if (!partes.length) return '?';
+                if (partes.length === 1) return partes[0].slice(0, 2).toUpperCase();
+                return (partes[0][0] + partes[partes.length - 1][0]).toUpperCase();
+            }
+
+            // Color del badge según el tipo de perfil
+            const COLORES_PERFIL = {
+                profesional: 'azul',
+                tecnico: 'naranja',
+                busco_trabajo: 'verde',
+                emprendedor: 'violeta',
+                empresa: 'rosa',
+                estudiante: 'cian',
+                institucion: 'ambar'
+            };
+
+            function badgeClase(tipo) {
+                return `badge-perfil badge-perfil--${COLORES_PERFIL[tipo] || 'gris'}`;
+            }
+
+            // Etiquetas legibles de los campos de perfil (en orden de aparición)
+            const CAMPOS_PERFIL_ORDEN = [
+                ['profesion', 'Profesión / actividad'],
+                ['especialidad', 'Especialidad'],
+                ['experiencia', 'Experiencia'],
+                ['interes', '¿Qué buscás?'],
+                ['nombre_emprendimiento', 'Nombre del emprendimiento'],
+                ['rubro', 'Rubro'],
+                ['localidad_emprendimiento', 'Localidad del emprendimiento'],
+                ['ofreces', '¿Qué ofrecés?'],
+                ['nombre_empresa', 'Nombre de la empresa'],
+                ['carrera', 'Carrera'],
+                ['institucion', 'Institución educativa'],
+                ['anio_cursado', 'Año que cursás'],
+                ['nombre_institucion', 'Nombre de la institución']
+            ];
+
+            function humanizar(clave) {
+                return String(clave)
+                    .replace(/_/g, ' ')
+                    .replace(/\b\w/g, (letra) => letra.toUpperCase());
+            }
+
+            function valorLegible(valor) {
+                if (Array.isArray(valor)) return valor.join(', ');
+                if (valor == null) return '';
+                return String(valor);
+            }
+
+            // Lista ordenada y etiquetada de todos los datos de un registro.
+            // Se reutiliza en el modal "Ver", en la descarga TXT y en el resumen de la tabla.
+            function camposLegibles(registro) {
+                const campos = [];
+                campos.push({ seccion: 'Datos personales', label: 'Fecha de registro', valor: formatearFecha(registro.fecha_registro) });
+                campos.push({ seccion: 'Datos personales', label: 'Tipo de perfil', valor: etiquetasPerfil[registro.tipo_perfil] || registro.tipo_perfil || '—' });
+                campos.push({ seccion: 'Datos personales', label: 'Nombre y apellido', valor: registro.nombre_apellido || '—' });
+                campos.push({ seccion: 'Datos personales', label: 'Localidad', valor: registro.localidad || '—' });
+                campos.push({ seccion: 'Datos personales', label: 'WhatsApp', valor: registro.whatsapp || '—' });
+                campos.push({ seccion: 'Datos personales', label: 'Email', valor: registro.email || '—' });
+                campos.push({ seccion: 'Datos personales', label: 'Red social', valor: registro.red_social || '—' });
+                if (registro.archivo_url) {
+                    campos.push({ seccion: 'Datos personales', label: 'Archivo adjunto', valor: registro.archivo_nombre || 'Ver archivo', url: registro.archivo_url });
+                } else {
+                    campos.push({ seccion: 'Datos personales', label: 'Archivo adjunto', valor: '—' });
+                }
 
                 const detalles = registro.perfil_detalles || {};
-                const camposLegibles = {
-                    profesion: 'Profesión',
-                    especialidad: 'Especialidad',
-                    experiencia: 'Experiencia',
-                    interes: 'Interés',
-                    nombre_emprendimiento: 'Emprendimiento',
-                    rubro: 'Rubro',
-                    localidad_emprendimiento: 'Localidad',
-                    ofreces: 'Ofrece',
-                    nombre_empresa: 'Empresa',
-                    carrera: 'Carrera',
-                    institucion: 'Institución',
-                    anio_cursado: 'Año',
-                    nombre_institucion: 'Institución'
-                };
 
-                Object.keys(camposLegibles).forEach((clave) => {
-                    if (detalles[clave]) {
-                        const valor = Array.isArray(detalles[clave])
-                            ? detalles[clave].join(', ')
-                            : String(detalles[clave]);
-                        if (valor) partes.push(`<strong>${camposLegibles[clave]}:</strong> ${escapar(valor)}`);
-                    }
+                CAMPOS_PERFIL_ORDEN.forEach(([clave, etiqueta]) => {
+                    const valor = valorLegible(detalles[clave]);
+                    if (valor) campos.push({ seccion: 'Detalles del perfil', label: etiqueta, valor });
+                });
+
+                Object.keys(detalles).forEach((clave) => {
+                    const esConocida = CAMPOS_PERFIL_ORDEN.some(([c]) => c === clave);
+                    if (esConocida) return;
+                    const valor = valorLegible(detalles[clave]);
+                    if (valor) campos.push({ seccion: 'Detalles del perfil', label: humanizar(clave), valor });
                 });
 
                 if (Array.isArray(registro.preferencias) && registro.preferencias.length) {
-                    partes.push(`<strong>Quiere encontrar:</strong> ${escapar(registro.preferencias.join(', '))}`);
+                    campos.push({ seccion: 'Preferencias', label: 'Quiere encontrar', valor: registro.preferencias.join(', ') });
                 }
 
-                return partes.join('<br>') || '—';
+                campos.push({ seccion: 'Autorizaciones', label: 'Autoriza uso de datos', valor: registro.autoriza_datos ? 'Sí ✅' : 'No ❌' });
+                campos.push({ seccion: 'Autorizaciones', label: 'Autoriza contacto', valor: registro.autoriza_contacto ? 'Sí ✅' : 'No ❌' });
+
+                return campos;
+            }
+
+            // Texto legible para la descarga TXT
+            function textoTXT(registro) {
+                const lineas = [];
+                lineas.push('============================================');
+                lineas.push('REGISTRO DE LA RED CONECTA SAN JUAN');
+                lineas.push('============================================');
+                let seccionActual = null;
+                camposLegibles(registro).forEach((campo) => {
+                    if (campo.seccion !== seccionActual) {
+                        seccionActual = campo.seccion;
+                        lineas.push('');
+                        lineas.push(`--- ${campo.seccion} ---`);
+                    }
+                    const sufijo = campo.url ? ` (${campo.url})` : '';
+                    lineas.push(`${campo.label}: ${campo.valor}${sufijo}`);
+                });
+                lineas.push('');
+                lineas.push(`Generado el ${new Date().toLocaleString('es-AR')}`);
+                return lineas.join('\n');
+            }
+
+            // Descargar un registro en formato TXT
+            function descargarTXT(registro) {
+                const contenido = '\uFEFF' + textoTXT(registro);
+                const blob = new Blob([contenido], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+
+                const base = (registro.nombre_apellido || 'registro')
+                    .toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/^-+|-+$/g, '') || 'registro';
+                const fecha = (registro.fecha_registro || '').slice(0, 10) || new Date().toISOString().slice(0, 10);
+
+                const enlace = document.createElement('a');
+                enlace.href = url;
+                enlace.download = `registro_${base}_${fecha}.txt`;
+                document.body.appendChild(enlace);
+                enlace.click();
+                enlace.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+            }
+
+            /* ==================== MODAL DETALLE ==================== */
+
+            function abrirModal(registro) {
+                document.getElementById('modal-titulo').textContent = registro.nombre_apellido || 'Registro';
+                const contenido = document.getElementById('modal-contenido');
+                let seccionActual = null;
+                let html = '';
+                camposLegibles(registro).forEach((campo) => {
+                    if (campo.seccion !== seccionActual) {
+                        seccionActual = campo.seccion;
+                        html += `<h4 class="modal-seccion">${escapar(campo.seccion)}</h4>`;
+                    }
+                    const valorHtml = campo.url
+                        ? `<a href="${escapar(campo.url)}" target="_blank" rel="noopener">${escapar(campo.valor)}</a>`
+                        : escapar(campo.valor).replace(/\n/g, '<br>');
+                    html += `
+                        <div class="detalle-fila">
+                            <span class="detalle-etiqueta">${escapar(campo.label)}</span>
+                            <span class="detalle-valor">${valorHtml}</span>
+                        </div>`;
+                });
+                contenido.innerHTML = html;
+                document.getElementById('modal-detalle').hidden = false;
+                document.body.classList.add('no-scroll');
+            }
+
+            function cerrarModal() {
+                document.getElementById('modal-detalle').hidden = true;
+                document.body.classList.remove('no-scroll');
+            }
+
+            let registrosActuales = [];
+
+            function registrosFiltrados() {
+                const q = normalizar(document.getElementById('busqueda').value);
+                const perfil = document.getElementById('filtro-perfil').value;
+
+                return registrosActuales.filter((registro) => {
+                    if (perfil && registro.tipo_perfil !== perfil) return false;
+                    if (!q) return true;
+                    return ['nombre_apellido', 'email', 'localidad', 'whatsapp'].some((clave) =>
+                        normalizar(registro[clave]).includes(q)
+                    );
+                });
+            }
+
+            function filaRegistro(registro) {
+                const [dia, hora] = fechaPartes(registro.fecha_registro);
+                const whatsapp = String(registro.whatsapp || '').replace(/\D/g, '');
+
+                return `
+                    <tr>
+                        <td data-label="Fecha"><span class="fecha-fila">${escapar(dia)}</span>${hora ? `<span class="hora-fila">${escapar(hora)}</span>` : ''}</td>
+                        <td data-label="Nombre">
+                            <div class="celda-nombre">
+                                <span class="avatar">${escapar(iniciales(registro.nombre_apellido))}</span>
+                                <strong>${escapar(registro.nombre_apellido)}</strong>
+                            </div>
+                        </td>
+                        <td data-label="Email"><span class="celda-secundaria">${escapar(registro.email || '—')}</span></td>
+                        <td data-label="Tipo de perfil"><span class="badge ${badgeClase(registro.tipo_perfil)}">${escapar(etiquetasPerfil[registro.tipo_perfil] || registro.tipo_perfil || '')}</span></td>
+                        <td data-label="Localidad">${escapar(registro.localidad || '—')}</td>
+                        <td data-label="WhatsApp">${whatsapp
+                            ? `<a href="https://wa.me/${whatsapp}" target="_blank" rel="noopener" class="wa-link">${escapar(registro.whatsapp)}</a>`
+                            : '—'}</td>
+                        <td data-label="Red"><span class="celda-secundaria">${escapar(registro.red_social || '—')}</span></td>
+                        <td data-label="Archivo">${registro.archivo_url
+                            ? `<a href="${escapar(registro.archivo_url)}" target="_blank" rel="noopener">${escapar(registro.archivo_nombre || 'Ver archivo')}</a>`
+                            : '—'}</td>
+                        <td data-label="Autoriza">
+                            ${registro.autoriza_datos ? '✅ Datos' : '❌ Datos'}
+                            ${registro.autoriza_contacto ? '· ✅ Contacto' : '· ❌ Contacto'}
+                        </td>
+                        <td data-label="Acciones">
+                            <div class="acciones">
+                                <button type="button" class="btn btn-secundario btn-sm" data-ver="${registro.id}">Ver</button>
+                                <button type="button" class="btn btn-primario btn-sm" data-descargar="${registro.id}">Descargar</button>
+                                <button type="button" class="btn btn-danger btn-sm" data-eliminar="${registro.id}" data-nombre="${escapar(registro.nombre_apellido)}">Eliminar</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+
+            function actualizarContador(mostrados, total) {
+                const contador = document.getElementById('contador-resultados');
+                contador.textContent = total ? `${mostrados} de ${total} registros` : '';
+            }
+
+            function renderTabla() {
+                const tbody = document.getElementById('tabla-registros');
+                const total = registrosActuales.length;
+                const filtrados = registrosFiltrados();
+                actualizarContador(filtrados.length, total);
+
+                if (!total) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="10">
+                                <div class="empty-state">
+                                    <span class="empty-icono">🌱</span>
+                                    Todavía no hay registros en la red.
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                if (!filtrados.length) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="10">
+                                <div class="empty-state">
+                                    <span class="empty-icono">🔍</span>
+                                    No se encontraron registros para la búsqueda.
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                tbody.innerHTML = filtrados.map(filaRegistro).join('');
+
+                // Delegación: ver detalle en el modal
+                tbody.querySelectorAll('[data-ver]').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        const registro = filtrados.find((r) => String(r.id) === btn.dataset.ver);
+                        if (registro) abrirModal(registro);
+                    });
+                });
+
+                // Delegación: descargar registro en TXT
+                tbody.querySelectorAll('[data-descargar]').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        const registro = filtrados.find((r) => String(r.id) === btn.dataset.descargar);
+                        if (registro) descargarTXT(registro);
+                    });
+                });
+
+                // Delegación: eliminar registros
+                tbody.querySelectorAll('[data-eliminar]').forEach((btn) => {
+                    btn.addEventListener('click', async () => {
+                        const nombre = btn.dataset.nombre;
+                        if (!confirm(`¿Eliminar el registro de "${nombre}"? Esta acción no se puede deshacer.`)) return;
+
+                        btn.disabled = true;
+                        try {
+                            await eliminarRegistro(btn.dataset.eliminar);
+                            mostrarMensaje(mensajeAdmin, '✅ Registro eliminado.', 'exito');
+                            cargarRegistros();
+                        } catch (error) {
+                            btn.disabled = false;
+                            mostrarMensaje(mensajeAdmin, '❌ ' + error.message, 'error');
+                        }
+                    });
+                });
             }
 
             async function cargarRegistros() {
                 const tbody = document.getElementById('tabla-registros');
 
                 try {
-                    const registros = await listarRegistros();
-
-                    if (!registros.length) {
-                        tbody.innerHTML = `
-                            <tr>
-                                <td colspan="11">
-                                    <div class="empty-state">
-                                        <span class="empty-icono">🌱</span>
-                                        Todavía no hay registros en la red.
-                                    </div>
-                                </td>
-                            </tr>
-                        `;
-                        return;
-                    }
-
-                    tbody.innerHTML = registros.map((registro) => `
-                        <tr>
-                            <td>${escapar(formatearFecha(registro.fecha_registro))}</td>
-                            <td><strong>${escapar(registro.nombre_apellido)}</strong></td>
-                            <td>${escapar(registro.email || '')}</td>
-                            <td><span class="badge badge-perfil">${escapar(etiquetasPerfil[registro.tipo_perfil] || registro.tipo_perfil || '')}</span></td>
-                            <td>${escapar(registro.localidad || '')}</td>
-                            <td>${escapar(registro.whatsapp || '')}</td>
-                            <td>${escapar(registro.red_social || '')}</td>
-                            <td>${registro.archivo_url
-                                ? `<a href="${escapar(registro.archivo_url)}" target="_blank" rel="noopener">${escapar(registro.archivo_nombre || 'Ver archivo')}</a>`
-                                : '—'}</td>
-                            <td class="celda-descripcion">${resumenDetalles(registro)}</td>
-                            <td>
-                                ${registro.autoriza_datos ? '✅ Datos' : '❌ Datos'}
-                                ${registro.autoriza_contacto ? '· ✅ Contacto' : '· ❌ Contacto'}
-                            </td>
-                            <td class="acciones-cell">
-                                <button type="button" class="btn btn-danger btn-sm" data-eliminar="${registro.id}" data-nombre="${escapar(registro.nombre_apellido)}">Eliminar</button>
-                            </td>
-                        </tr>
-                    `).join('');
-
-                    // Delegación: eliminar registros
-                    tbody.querySelectorAll('[data-eliminar]').forEach((btn) => {
-                        btn.addEventListener('click', async () => {
-                            const nombre = btn.dataset.nombre;
-                            if (!confirm(`¿Eliminar el registro de "${nombre}"? Esta acción no se puede deshacer.`)) return;
-
-                            btn.disabled = true;
-                            try {
-                                await eliminarRegistro(btn.dataset.eliminar);
-                                mostrarMensaje(mensajeAdmin, '✅ Registro eliminado.', 'exito');
-                                cargarRegistros();
-                            } catch (error) {
-                                btn.disabled = false;
-                                mostrarMensaje(mensajeAdmin, '❌ ' + error.message, 'error');
-                            }
-                        });
-                    });
-
+                    registrosActuales = await listarRegistros();
+                    renderTabla();
                 } catch (error) {
                     const esPGRST205 = error.message.includes('PGRST205') || error.message.includes('Could not find the table');
                     tbody.innerHTML = `
                         <tr>
-                            <td colspan="11">
+                            <td colspan="10">
                                 <div class="empty-state">
                                     <span class="empty-icono">${esPGRST205 ? '🛠️' : '⚠️'}</span>
                                     ${esPGRST205
@@ -313,6 +558,29 @@
                     `;
                 }
             }
+
+            /* ==================== MODAL - EVENTOS ==================== */
+
+            document.getElementById('modal-cerrar').addEventListener('click', cerrarModal);
+            document.getElementById('modal-detalle').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('modal-detalle')) cerrarModal();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !document.getElementById('modal-detalle').hidden) cerrarModal();
+            });
+
+            /* ==================== FILTROS Y BÚSQUEDA ==================== */
+
+            const selectPerfil = document.getElementById('filtro-perfil');
+            Object.entries(etiquetasPerfil).forEach(([valor, etiqueta]) => {
+                const opcion = document.createElement('option');
+                opcion.value = valor;
+                opcion.textContent = etiqueta;
+                selectPerfil.appendChild(opcion);
+            });
+
+            document.getElementById('busqueda').addEventListener('input', renderTabla);
+            selectPerfil.addEventListener('change', renderTabla);
 
             /* ==================== INICIO ==================== */
 
